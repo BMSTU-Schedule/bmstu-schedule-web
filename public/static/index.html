@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=0.8; user-scalable=no">
+    <title>BMSTU Schedule iCalendar Generator</title>
+</head>
+<body>
+<script src="/bundle.js"></script>
+
+<!--
+Form source: https://codepen.io/visualcookie/pen/kkwxPm
+Thanks :)
+!-->
+<div class="container" align="middle">
+    <h2>BMSTU Schedule <a href="https://en.wikipedia.org/wiki/ICalendar" target="_blank">.ics</a> Generator</h2>
+    <div class="container__item">
+        <div class="form">
+            <input type="text" class="form__field" placeholder="Your Group (ex. ИУ7-53)" id="group"
+                   onkeypress="onInputKeyPress(event)" oninput="onInputInput()"/>
+            <button type="button" class="btn btn--primary btn--inside uppercase" id="btn"
+                    onclick="onButtonClick()" oninput="onInputInput()">
+                Get
+            </button>
+        </div>
+    </div>
+
+    <div class="container__item container__item--bottom">
+        <p>Source on <a href="https://github.com/BMSTU-Schedule/web" target="_blank">Github</a>.</p>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,50 @@
+{
+  "name": "bmstu-schedule-ical",
+  "version": "0.0.1",
+  "description": "BMSTU schedule .ical generator",
+  "main": "index.js",
+  "scripts": {
+    "eslint": "eslint app/",
+    "generate_bundle": "webpack",
+    "delete_bundle": "rm ./public/static/bundle.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BMSTU-Schedule/web.git"
+  },
+  "keywords": [
+    "bmstu",
+    "ical",
+    "schedule",
+    "university"
+  ],
+  "author": "Ed Asriyan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/BMSTU-Schedule/web/issues"
+  },
+  "homepage": "https://github.com/BMSTU-Schedule/web#readme",
+  "dependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-es2015": "^6.24.1",
+    "css-loader": "^1.0.0",
+    "file-saver": "^1.3.3",
+    "node-sass": "^4.6.0",
+    "sass-loader": "^7.1.0",
+    "style-loader": "^0.22.1",
+    "uglifyjs-webpack-plugin": "^1.0.1",
+    "webpack": "^4.17.1"
+  },
+  "devDependencies": {
+    "eslint": "^5.4.0",
+    "eslint-config-standard": "^11.0.0-beta.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-node": "^7.0.1",
+    "eslint-plugin-promise": "^4.0.0",
+    "eslint-plugin-standard": "^3.0.1",
+    "rewire": "^4.0.1",
+    "webpack-cli": "^3.1.0"
+  }
+}
