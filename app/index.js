@@ -9,60 +9,60 @@ import './styles.scss';
 import {saveAs} from 'file-saver';
 import {trackPageView, trackScheduleRequest, trackScheduleResult} from './analytics';
 
-const ERROR_INVALID_FORMAT = 'Указан неверный формат номера группы.';
-const ERROR_NOT_FOUND = 'Чёт я ничего не нашел для этой группы, кажется. Если ты не уточнил тип группы (Б/М/А), сделай это и попробуй ещё раз.';
-const ERROR_UNKNOWN_ERROR = 'Уупс. У нас что-то пошло не так. Скоро всё поправим';
+import Group from './models/group';
+import getIcs from './utils/get-ics';
+import parseGroup from './utils/parse-group-str';
+
+import {NotFoundError} from './exceptions/network';
+import {SavingIcsError} from './exceptions/saving';
 
 trackPageView();
 
-const normalizeInput = function (input) {
-    input = input.toUpperCase();
-    const regex = /^[а-яА-Я]{1,4}\d{0,2}\-\d{1,3}[а-яА-Я]?$$/;
-    const match = regex.exec(input);
-
-    if (!match) {
-        return;
+const getIcsSafe = async function(group) {
+    try {
+        return await getIcs(group);
+    } catch (e) {
+        return null;
     }
-
-    return input;
 };
 
-const getSchedule = async function (input) {
-    input = normalizeInput(input);
+const getSchedule = async function(input) {
+    const group = new Group(input);
 
-    if (input === undefined) {
-        throw ERROR_INVALID_FORMAT;
+    let ics = await getIcsSafe(group);
+    if (!ics && !group.type) {
+        const groups = [group.toString()];
+        group.makeBachelor();
+        ics = await getIcsSafe(group);
+
+        if (!ics) {
+            groups.push(group.toString());
+            group.makeMaster();
+            ics = await getIcsSafe(group);
+        }
+
+        if (!ics) {
+            groups.push(group.toString());
+            throw new Error(`none of the groups ${groups.join(', ')} found`);
+        }
     }
 
-    let ics;
-    try {
-      const response = (await fetch(`/ics/${input}.ics`));
-
-      if (response.status !== 200) {
-          throw ERROR_NOT_FOUND;
-      }
-
-      ics = await response.text()
-    } catch (e) {
-      trackScheduleResult('error fetch', input);
-      if (typeof e === 'string') {
-          throw e;
-      }
-      throw ERROR_UNKNOWN_ERROR;
+    if (!ics) {
+        throw new NotFoundError(group);
     }
 
     try {
         const blob = new Blob([ics], {type: 'text/calendar;charset=utf-8'});
-        saveAs(blob, `${input}.ics`);
+        saveAs(blob, `${group.toString()}.ics`);
     } catch (e) {
-        trackScheduleResult('error save', input);
-        throw ERROR_UNKNOWN_ERROR;
+        trackScheduleResult('error save', group.toString());
+        throw new SavingIcsError();
     }
 
     trackScheduleResult('ok', input);
 };
 
-const animInvalidInput = function () {
+const animInvalidInput = function() {
     const input = document.getElementById('group');
     const btn = document.getElementById('btn');
 
@@ -70,7 +70,7 @@ const animInvalidInput = function () {
     input.classList.add('form__field__invalid');
 };
 
-const animValidInput = function () {
+const animValidInput = function() {
     const input = document.getElementById('group');
     const btn = document.getElementById('btn');
 
@@ -78,7 +78,7 @@ const animValidInput = function () {
     input.classList.remove('form__field__invalid');
 };
 
-const animFetching = function () {
+const animFetching = function() {
     const input = document.getElementById('group');
     const btn = document.getElementById('btn');
 
@@ -87,12 +87,12 @@ const animFetching = function () {
     btn.innerHTML = '...';
 };
 
-const animUserInput = function () {
+const animUserInput = function() {
     const input = document.getElementById('group');
     const btn = document.getElementById('btn');
 
     input.classList.remove('form__field__hidden');
-    if (!input.value || normalizeInput(input.value)) {
+    if (!input.value || parseGroup(input.value)) {
         btn.classList.remove('btn__hidden');
     } else {
         btn.classList.add('btn__hidden');
@@ -100,10 +100,11 @@ const animUserInput = function () {
     btn.innerHTML = 'Get';
 };
 
-window.onInputInput = function () {
+window.onInputInput = function() {
     const input = document.getElementById('group');
 
-    if (!input.value || normalizeInput(input.value)) {
+    console.log(parseGroup(input.value), input.value);
+    if (!input.value || parseGroup(input.value)) {
         animValidInput();
     } else {
         animInvalidInput();
@@ -112,7 +113,7 @@ window.onInputInput = function () {
 
 let isFetching = false;
 
-window.onInputKeyPress = async function (e) {
+window.onInputKeyPress = async function(e) {
     if (e.keyCode === 13) {
         if (isFetching) return;
 
@@ -134,7 +135,7 @@ window.onInputKeyPress = async function (e) {
     }
 };
 
-window.onButtonClick = async function () {
+window.onButtonClick = async function() {
     if (isFetching) return;
 
     const input = document.getElementById('group');
