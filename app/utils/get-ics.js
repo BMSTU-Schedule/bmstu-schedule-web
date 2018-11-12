@@ -4,18 +4,18 @@
 
 'use strict';
 
-import {FetchErrorError, NotFoundError} from '../exceptions/network';
+import {FetchErrorError, NotFoundError} from 'app/exceptions/network';
 
-const HOST = 'https://bmstu-schedule.ru/';
+import {BACKEND_HOST} from 'config';
 
 export default async function(group) {
-    const response = await fetch(`${HOST}ics/${group.toString()}.ics`).catch(() => {
-        throw new FetchErrorError();
-    });
+  const response = await fetch(`${BACKEND_HOST}ics/${group.toString()}.ics`).catch(() => {
+    throw new FetchErrorError();
+  });
 
-    if (response.status !== 200) {
-        throw new NotFoundError(group);
-    }
+  if (response.status !== 200) {
+    throw new NotFoundError(group);
+  }
 
-    return await response.text();
-};
+  return await response.text();
+}

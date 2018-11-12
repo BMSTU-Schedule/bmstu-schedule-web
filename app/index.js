@@ -19,138 +19,137 @@ import {SavingIcsError} from './exceptions/saving';
 trackPageView();
 
 const getIcsSafe = async function(group) {
-    try {
-        return await getIcs(group);
-    } catch (e) {
-        return null;
-    }
+  try {
+    return await getIcs(group);
+  } catch (e) {
+    return null;
+  }
 };
 
 const getSchedule = async function(input) {
-    const group = new Group(input);
+  const group = new Group(input);
 
-    let ics = await getIcsSafe(group);
-    if (!ics && !group.type) {
-        const groups = [group.toString()];
-        group.makeBachelor();
-        ics = await getIcsSafe(group);
+  let ics = await getIcsSafe(group);
+  if (!ics && !group.type) {
+    const groups = [group.toString()];
+    group.makeBachelor();
+    ics = await getIcsSafe(group);
 
-        if (!ics) {
-            groups.push(group.toString());
-            group.makeMaster();
-            ics = await getIcsSafe(group);
-        }
-
-        if (!ics) {
-            groups.push(group.toString());
-            throw new Error(`none of the groups ${groups.join(', ')} found`);
-        }
+    if (!ics) {
+      groups.push(group.toString());
+      group.makeMaster();
+      ics = await getIcsSafe(group);
     }
 
     if (!ics) {
-        throw new NotFoundError(group);
+      groups.push(group.toString());
+      throw new Error(`none of the groups ${groups.join(', ')} found`);
     }
+  }
 
-    try {
-        const blob = new Blob([ics], {type: 'text/calendar;charset=utf-8'});
-        saveAs(blob, `${group.toString()}.ics`);
-    } catch (e) {
-        trackScheduleResult('error save', group.toString());
-        throw new SavingIcsError();
-    }
+  if (!ics) {
+    throw new NotFoundError(group);
+  }
 
-    trackScheduleResult('ok', input);
+  try {
+    const blob = new Blob([ics], {type: 'text/calendar;charset=utf-8'});
+    saveAs(blob, `${group.toString()}.ics`);
+  } catch (e) {
+    trackScheduleResult('error save', group.toString());
+    throw new SavingIcsError();
+  }
+
+  trackScheduleResult('ok', input);
 };
 
 const animInvalidInput = function() {
-    const input = document.getElementById('group');
-    const btn = document.getElementById('btn');
+  const input = document.getElementById('group');
+  const btn = document.getElementById('btn');
 
-    btn.classList.add('btn__hidden');
-    input.classList.add('form__field__invalid');
+  btn.classList.add('btn__hidden');
+  input.classList.add('form__field__invalid');
 };
 
 const animValidInput = function() {
-    const input = document.getElementById('group');
-    const btn = document.getElementById('btn');
+  const input = document.getElementById('group');
+  const btn = document.getElementById('btn');
 
-    btn.classList.remove('btn__hidden');
-    input.classList.remove('form__field__invalid');
+  btn.classList.remove('btn__hidden');
+  input.classList.remove('form__field__invalid');
 };
 
 const animFetching = function() {
-    const input = document.getElementById('group');
-    const btn = document.getElementById('btn');
+  const input = document.getElementById('group');
+  const btn = document.getElementById('btn');
 
-    input.classList.add('form__field__hidden');
-    btn.classList.remove('btn__hidden');
-    btn.innerHTML = '...';
+  input.classList.add('form__field__hidden');
+  btn.classList.remove('btn__hidden');
+  btn.innerHTML = '...';
 };
 
 const animUserInput = function() {
-    const input = document.getElementById('group');
-    const btn = document.getElementById('btn');
+  const input = document.getElementById('group');
+  const btn = document.getElementById('btn');
 
-    input.classList.remove('form__field__hidden');
-    if (!input.value || parseGroup(input.value)) {
-        btn.classList.remove('btn__hidden');
-    } else {
-        btn.classList.add('btn__hidden');
-    }
-    btn.innerHTML = 'Get';
+  input.classList.remove('form__field__hidden');
+  if (!input.value || parseGroup(input.value)) {
+    btn.classList.remove('btn__hidden');
+  } else {
+    btn.classList.add('btn__hidden');
+  }
+  btn.innerHTML = 'Get';
 };
 
 window.onInputInput = function() {
-    const input = document.getElementById('group');
+  const input = document.getElementById('group');
 
-    console.log(parseGroup(input.value), input.value);
-    if (!input.value || parseGroup(input.value)) {
-        animValidInput();
-    } else {
-        animInvalidInput();
-    }
+  if (!input.value || parseGroup(input.value)) {
+    animValidInput();
+  } else {
+    animInvalidInput();
+  }
 };
 
 let isFetching = false;
 
 window.onInputKeyPress = async function(e) {
-    if (e.keyCode === 13) {
-        if (isFetching) return;
-
-        const input = document.getElementById('group');
-
-        trackScheduleRequest('enter', input.value);
-
-        animFetching();
-
-        isFetching = true;
-        try {
-            await getSchedule(input.value);
-        } catch (e) {
-            alert(e);
-        }
-        isFetching = false;
-
-        animUserInput();
-    }
-};
-
-window.onButtonClick = async function() {
+  if (e.keyCode === 13) {
     if (isFetching) return;
 
     const input = document.getElementById('group');
 
-    trackScheduleRequest('click', input.value);
+    trackScheduleRequest('enter', input.value);
 
     animFetching();
 
     isFetching = true;
     try {
-        await getSchedule(input.value);
+      await getSchedule(input.value);
     } catch (e) {
-        alert(e);
+      alert(e);
     }
     isFetching = false;
 
     animUserInput();
+  }
+};
+
+window.onButtonClick = async function() {
+  if (isFetching) return;
+
+  const input = document.getElementById('group');
+
+  trackScheduleRequest('click', input.value);
+
+  animFetching();
+
+  isFetching = true;
+  try {
+    await getSchedule(input.value);
+  } catch (e) {
+    alert(e);
+  }
+  isFetching = false;
+
+  animUserInput();
 };

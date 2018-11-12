@@ -7,6 +7,7 @@
 // it's okay, it's a public data
 const TRACKING_ID = 'UA-109224221-1';
 
+/* eslint-disable */
 const init = function () {
     // https://developers.google.com/analytics/devguides/collection/analyticsjs
     (function (i, s, o, g, r, a, m) {
@@ -22,28 +23,29 @@ const init = function () {
 
     window.ga('create', TRACKING_ID, 'auto');
 };
+/* eslint-enable */
 
-const send = function (method, options = {}) {
-    window.ga || init();
-    return window.ga('send', method, options);
+const send = function(method, options = {}) {
+  window.ga || init();
+  return window.ga('send', method, options);
 };
 
-const sendEvent = function (category, action, label) {
-    return send('event', {
-        eventCategory: category,
-        eventAction: action,
-        eventLabel: label
-    });
+const sendEvent = function(category, action, label) {
+  return send('event', {
+    eventCategory: category,
+    eventAction: action,
+    eventLabel: label,
+  });
 };
 
-export const trackPageView = function () {
-    return send('pageview');
+export const trackPageView = function() {
+  return send('pageview');
 };
 
-export const trackScheduleRequest = function (type, group) {
-    return sendEvent('Schedule Input', type, group);
+export const trackScheduleRequest = function(type, group) {
+  return sendEvent('Schedule Input', type, group);
 };
 
-export const trackScheduleResult = function (result, group) {
-    return sendEvent('Schedule Response', result, group);
+export const trackScheduleResult = function(result, group) {
+  return sendEvent('Schedule Response', result, group);
 };

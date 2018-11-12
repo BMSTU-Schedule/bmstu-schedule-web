@@ -4,30 +4,30 @@
 
 'use strict';
 
-import {InvalidGroupFormatError} from '../exceptions/validation';
-import parseGroup from '../utils/parse-group-str';
+import {InvalidGroupFormatError} from 'app/exceptions/validation';
+import parseGroup from 'app/utils/parse-group-str';
 
 export default class Group {
-    constructor(str) {
-        const parseResult = parseGroup(str);
-        if (!parseResult) {
-            throw new InvalidGroupFormatError(str);
-        }
-
-        this.department = parseResult.department;
-        this.groupNumber = parseResult.groupNumber;
-        this.type = parseResult.type;
+  constructor(str) {
+    const parseResult = parseGroup(str);
+    if (!parseResult) {
+      throw new InvalidGroupFormatError(str);
     }
 
-    makeBachelor() {
-        this.type = 'Б';
-    }
+    this.department = parseResult.department;
+    this.groupNumber = parseResult.groupNumber;
+    this.type = parseResult.type;
+  }
 
-    makeMaster() {
-        this.type = 'М';
-    }
+  makeBachelor() {
+    this.type = 'Б';
+  }
 
-    toString() {
-        return `${this.department}-${this.groupNumber}${this.type}`;
-    }
+  makeMaster() {
+    this.type = 'М';
+  }
+
+  toString() {
+    return `${this.department}-${this.groupNumber}${this.type}`;
+  }
 }
