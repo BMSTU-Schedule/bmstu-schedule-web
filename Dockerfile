@@ -14,6 +14,7 @@ RUN npm install
 ADD app ./app
 ADD public ./public
 ADD webpack.config.js .
+ADD config ./config
 ADD nginx.conf /etc/nginx/nginx.conf
 
 # Generate bundle
